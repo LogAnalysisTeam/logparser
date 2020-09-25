@@ -14,6 +14,9 @@ import pandas as pd
 import hashlib
 import string
 
+import logging
+logger = logging.getLogger(__name__)
+
 class Partition:
     """ Wrap around the logs and the step number
     """
@@ -81,7 +84,7 @@ class LogParser:
             self.partitionsL.append(Partition(stepNo=1, numOfLogs=0, lenOfLogs=logLen))
 
     def parse(self, logname):
-        print('Parsing file: ' + os.path.join(self.para.path, logname))
+        logger.info('Parsing file: ' + os.path.join(self.para.path, logname))
         self.logname = logname
         starttime = datetime.now()
         self.Step1()
@@ -90,7 +93,7 @@ class LogParser:
         self.Step4()
         self.getOutput()
         self.WriteEventToFile()
-        print('Parsing done. [Time taken: {!s}]'.format(datetime.now() - starttime))
+        logger.info('Parsing done. [Time taken: {!s}]'.format(datetime.now() - starttime))
 
     def Step1(self):
         headers, regex = self.generate_logformat_regex(self.para.logformat)
@@ -212,7 +215,7 @@ class LogParser:
                     p2Set.add(logL[p2])
 
                     if (logL[p1] == logL[p2]):
-                        print ("Warning: p1 may be equal to p2")
+                        logger.info ("Warning: p1 may be equal to p2")
 
                     if logL[p1] not in mapRelation1DS:
                         mapRelation1DS[logL[p1]] = set()
@@ -280,8 +283,8 @@ class LogParser:
                         oneToMP2D[logL[p2]] += 1
 
             except KeyError as er:
-                print (er)
-                print ('error: ' + str(p1) + '\t' + str(p2))
+                logger.info(er)
+                logger.info('error: ' + str(p1) + '\t' + str(p2))
 
             newPartitionsD = {}
             if partition.stepNo == 2:
@@ -372,7 +375,7 @@ class LogParser:
                 continue
 
             if partition.numOfLogs == 0:
-                print (str(partition.stepNo) + '\t')
+                logger.info(str(partition.stepNo) + '\t')
 
             uniqueTokensCountLS = []
             for columnIdx in range(partition.lenOfLogs):
@@ -433,8 +436,8 @@ class LogParser:
         try:
             distance = 1.0 * cardOfS / Lines_that_match_S
         except ZeroDivisionError as er1:
-            print (er1)
-            print ("cardOfS: " + str(cardOfS) + '\t' + 'Lines_that_match_S: ' + str(Lines_that_match_S))
+            logger.info(er1)
+            logger.info("cardOfS: " + str(cardOfS) + '\t' + 'Lines_that_match_S: ' + str(Lines_that_match_S))
 
         if distance <= self.para.lowerBound:
             if one_m:
@@ -575,17 +578,17 @@ class LogParser:
 
     def PrintPartitions(self):
         for idx in range(len(self.partitionsL)):
-            print ('Partition {}:(from step {})    Valid:{}'.format(idx, self.partitionsL[idx].stepNo,
+            logger.info('Partition {}:(from step {})    Valid:{}'.format(idx, self.partitionsL[idx].stepNo,
                                                                     self.partitionsL[idx].valid))
 
             for log in self.partitionsL[idx].logLL:
-                print (log)
+                logger.info(log)
 
     def PrintEventStats(self):
         for event in self.eventsL:
             if event.eventCount > 1:
-                print (str(event.eventId) + '\t' + str(event.eventCount))
-                print (event.eventStr)
+                logger.info(str(event.eventId) + '\t' + str(event.eventCount))
+                logger.info(event.eventStr)
 
     def log_to_dataframe(self, log_file, regex, headers, logformat):
         """ Function to transform log file to dataframe 

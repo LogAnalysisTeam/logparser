@@ -14,6 +14,9 @@ import pandas as pd
 import hashlib
 from datetime import datetime
 
+import logging
+logger = logging.getLogger(__name__)
+
 class Node:
     def __init__(self, format='', logIDL=None, childL=None):
         self.format = format
@@ -341,7 +344,7 @@ class LogParser:
 
 
     def parse(self, logname):
-        print('Parsing file: ' + os.path.join(self.path, logname))
+        logger.info('Parsing file: ' + os.path.join(self.path, logname))
         self.logname = logname
         starttime = datetime.now()
         rootNode = Node()
@@ -367,7 +370,7 @@ class LogParser:
             os.makedirs(self.savePath)
 
         self.outputResult(rootNode)
-        print('Parsing done. [Time taken: {!s}]'.format(datetime.now() - starttime))
+        logger.info('Parsing done. [Time taken: {!s}]'.format(datetime.now() - starttime))
 
 
     def load_data(self):

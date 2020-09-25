@@ -6,6 +6,9 @@ import pickle
 from main.org.core.validation.oracle import OracleTemplates
 from main.org.core.validation.validate_chromosomes import validate_chromosome
 
+import logging
+logger = logging.getLogger(__name__)
+
 """
     this script is a wrapper for the validation process of MoLFI and can be used from the command line as following
     python3.6 path/to/validation.py --chrom [serialized_templates] --time [exec_time_MoLFI] --oracle [oracle_file] 
@@ -92,7 +95,7 @@ if os.stat(csv_file).st_size == 0:
 oracle = OracleTemplates(oracle_file)
 validate_file=open(tmp_file, 'w')
 # validate the generated templates against the oracle
-print("Validating chromosomes\n")
+logger.info("Validating chromosomes\n")
 # validate the three best chromosomes: output of the NSGA_II script
 # and return a list with the metrics
 # pareto = [knee_solution, knee_solution1, mid_solution]
@@ -106,7 +109,7 @@ for key in solutions.keys():
                      str(metrics[2]), str(metrics[3]), str(metrics[4]), str(metrics[5])))
 #
 
-print('Finishing Template Extraction for Run ', str(run))
-print('************************************************************************************************************')
+logger.info('Finishing Template Extraction for Run ', str(run))
+logger.info('************************************************************************************************************')
 validate_file.close()
 csvfile.close()

@@ -14,6 +14,8 @@ import os
 import pandas as pd
 import hashlib
 
+import logging
+logger = logging.getLogger(__name__)
 
 class Para:
     def __init__(self, path, rex, savePath, groupNum, logformat): 
@@ -39,7 +41,7 @@ class LogParser:
     def loadLog(self):
         """ Load datasets and use regular expression to split it and remove some columns 
         """
-        print('Loading logs...')
+        logger.info('Loading logs...')
         headers, regex = self.generate_logformat_regex(self.para.logformat)
         self.df_log = self.log_to_dataframe(os.path.join(self.para.path, self.logname), regex, headers,
                                             self.para.logformat)
@@ -53,7 +55,7 @@ class LogParser:
             self.wordLL.append(tuple(wordSeq))
 
     def termpairGene(self):
-        print('Generating term pairs...')
+        logger.info('Generating term pairs...')
         i = 0
         for wordL in self.wordLL:
             wordLT = []
@@ -98,7 +100,7 @@ class LogParser:
             in this process, termpairs occurange should also make some changes and logNumber 
             of corresponding should be changed
         """
-        print('Log message partitioning...')
+        logger.info('Log message partitioning...')
         changed = True
         while changed:
             changed = False
@@ -129,7 +131,7 @@ class LogParser:
         """ Calculate the occurancy of each word of each group, and for each group, save the words that
             happen more than half all log number to be candidateTerms(list of dict, words:frequency),
         """
-        print('Log message signature construction...')
+        logger.info('Log message signature construction...')
         # create the folder to save the resulted templates
         if not os.path.exists(self.para.savePath):
             os.makedirs(self.para.savePath)
@@ -261,7 +263,7 @@ class LogParser:
         return headers, regex
 
     def parse(self, logname):
-        print('Parsing file: ' + os.path.join(self.para.path, logname))
+        logger.info('Parsing file: ' + os.path.join(self.para.path, logname))
         start_time = datetime.now()
         self.logname = logname
         self.loadLog()
@@ -269,7 +271,7 @@ class LogParser:
         self.LogMessParti()
         self.signatConstr()
         self.writeResultToFile()
-        print('Parsing done. [Time taken: {!s}]'.format(datetime.now() - start_time))
+        logger.info('Parsing done. [Time taken: {!s}]'.format(datetime.now() - start_time))
 
 
 def potenFunc(curGroupIndex, termPairLogNumLD, logNumPerGroup, lineNum, termpairLT, k):

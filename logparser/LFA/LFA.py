@@ -15,6 +15,8 @@ import numpy as np
 from collections import defaultdict
 from datetime import datetime
 
+import logging
+logger = logging.getLogger(__name__)
 
 class LogParser(object):
     def __init__(self, indir, outdir, log_format, rex=[]):
@@ -27,12 +29,12 @@ class LogParser(object):
         self.wordpos_count = defaultdict(int)
 
     def parse(self, logname):
-        print('Parsing file: ' + os.path.join(self.path, logname))
+        logger.info('Parsing file: ' + os.path.join(self.path, logname))
         self.logname = logname
         start_time = datetime.now()
         self.firstpass()
         self.secondpass()
-        print('Parsing done. [Time taken: {!s}]'.format(datetime.now() - start_time))
+        logger.info('Parsing done. [Time taken: {!s}]'.format(datetime.now() - start_time))
 
     def firstpass(self):
         headers, regex = self.generate_logformat_regex(self.logformat)
@@ -52,7 +54,7 @@ class LogParser(object):
             for pos, word in enumerate(wordseq):
                 # if word.strip() != "<*>":
                 self.wordpos_count[(pos,word)] += 1
-        print('First pass done.')
+        logger.info('First pass done.')
 
     def secondpass(self):
         self.templates = {}
@@ -75,7 +77,7 @@ class LogParser(object):
                                             "count": 1}
             else:
                 self.templates[template]['count'] += 1
-        print('Second pass done.')
+        logger.info('Second pass done.')
 
         self.df_log['EventId'] = map(lambda x: self.templates[x]['id'], templatel)
         self.df_log['EventTemplate'] = templatel

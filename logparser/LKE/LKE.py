@@ -14,6 +14,9 @@ import pandas as pd
 import hashlib
 import numpy as np
 
+import logging
+logger = logging.getLogger(__name__)
+
 SAVEDISTANCE = True
 
 class Para:
@@ -47,7 +50,7 @@ class LogParser:
         return x
 
     def paraErasing(self):
-        print('=== Step 1: Erasing parameters ===')
+        logger.info('=== Step 1: Erasing parameters ===')
         headers, regex = self.generate_logformat_regex(self.para.logformat)
         self.df_log = self.log_to_dataframe(os.path.join(self.para.path, self.logname), regex, 
                                             headers, self.para.logformat)
@@ -64,21 +67,21 @@ class LogParser:
     def clustering(self):
         sys.setrecursionlimit(100000000) #set the recursion limits number
         v=math.floor(sum(self.wordLen)/len(self.wordLen))
-        print('the parameter v is: %d' %(v))
+        logger.info('the parameter v is: %d' %(v))
         logNum=len(self.wordLen)
-        print('there are %d loglines'%(logNum))
+        logger.info('there are %d loglines'%(logNum))
         #In order to save time, load distArraydata, if exist, do not calculate the edit distance again:
         if os.path.exists(self.para.savePath+self.logname+'editDistance.csv') and SAVEDISTANCE:
-            print('Loading distance matrix from cache..')
+            logger.info('Loading distance matrix from cache..')
             distMat=np.genfromtxt(self.para.savePath+self.logname+'editDistance.csv',delimiter=',')
             distList=np.genfromtxt(self.para.savePath+self.logname+'distArray.csv',delimiter=',')
         else:
-            print('calculating distance....')
+            logger.info('calculating distance....')
             path=self.para.savePath+self.logname
             distMat,distList=calDistance(self.wordLL,v,path)
         distArray=np.array(distList)
         threshold1=self.GetkMeansThreshold(distArray)
-        print('the threshold1 is: %s'%(threshold1))
+        logger.info('the threshold1 is: %s'%(threshold1))
         
         # connect two loglines with distance < threshold, logDict is a dictionary
         # where the key is line num while 
@@ -102,7 +105,7 @@ class LogParser:
             self.loglinesOfGroups.append(groupLoglist)
             self.loglineNumPerGroup.append(len(groupLoglist))
 
-        print('================get the initial groups splitting=============')
+        logger.info('================get the initial groups splitting=============')
         wordLenArray=np.array(self.wordLen)
         for row in self.loglinesOfGroups:
             eachLineLogList=[]
@@ -110,11 +113,11 @@ class LogParser:
             for colu in row:
                 eachLineLogList.append(self.wordLL[colu])
             self.groups.append(eachLineLogList)
-        print('there are %s groups'%(len(self.wordLenPerGroup)))
+        logger.info('there are %s groups'%(len(self.wordLenPerGroup)))
     
     #k-means where k equals 2 to divide the edit distance into two groups
     def GetkMeansThreshold(self, distArray):
-        print('kMeans calculation...')
+        logger.info('kMeans calculation...')
         distArraySize=len(distArray)
         #random choose two centroids
         minValue=min(distArray)
@@ -146,8 +149,8 @@ class LogParser:
 
     #split the current group recursively.
     def splitting(self):
-        print('splitting into different groups...')
-        print ('the split_threshold is %d'%(self.para.split_threshold))
+        logger.info('splitting into different groups...')
+        logger.info ('the split_threshold is %d'%(self.para.split_threshold))
         groupNum=len(self.groups) #how many groups initially
         for i in range(groupNum):
             splitEachGroup(self.groups[i],self.para.split_threshold,self.loglinesOfGroups[i])    
@@ -155,8 +158,8 @@ class LogParser:
         # to flat the list of list of list to list of many lists, that is only one layer lists nested
         mergeLists(self.groups,self.newGroups)
         mergeLists(self.loglinesOfGroups,self.flatLogLineGroups)
-        print('Merge the lists together...')
-        print('there are %s different groups'%(len(self.flatLogLineGroups)))
+        logger.info('Merge the lists together...')
+        logger.info('there are %s different groups'%(len(self.flatLogLineGroups)))
 
     #extract the templates according to the logs in each group
     def extracting(self):
@@ -167,14 +170,14 @@ class LogParser:
                 self.templates.append(eachGroup[0])
             else:
                 # commonPart = 
-                # print(eachGroup)
+                # logger.info(eachGroup)
                 # sys.exit()
                 commonPart=LCS(eachGroup[0],eachGroup[1])
                 for k in range(2,groupLen):
                     if not comExit(commonPart,eachGroup[k]):
                         commonPart=LCS(commonPart,eachGroup[k])
                         if len(commonPart)==0:
-                            print('there is no common part in this group')
+                            logger.info('there is no common part in this group')
                             commonPart=["<*>"]
                             break
                 self.templates.append(commonPart)
@@ -251,14 +254,14 @@ class LogParser:
 
     def parse(self, logname):
         starttime = datetime.now()
-        print('Parsing file: ' + os.path.join(self.para.path, logname))
+        logger.info('Parsing file: ' + os.path.join(self.para.path, logname))
         self.logname = logname
         self.paraErasing()
         self.clustering()
         self.splitting()
         self.extracting()
         self.writeResultToFile()
-        print('Parsing done. [Time taken: {!s}]'.format(datetime.now() - starttime))
+        logger.info('Parsing done. [Time taken: {!s}]'.format(datetime.now() - starttime))
 
 
 #merge the list of lists(many layer) into one list of list
@@ -288,7 +291,7 @@ def splitEachGroup(eachGroup,split_threshold,loglinesEachGroup):
             diffwords=returnValues['diffWordList']
             posi=returnValues['minIndex']
             conOrParaDivi=returnValues['conOrParaDivi']
-            # print('the different words are:',diffwords)
+            # logger.info('the different words are:',diffwords)
             #each item in the diffwords corresponds to a group
             for k in range(len(diffwords)):
                 newgroups=[]
@@ -329,7 +332,7 @@ def posiToSplit(eachGroup,split_threshold):
             commonPart=LCS(commonPart,eachGroup[i])
             if len(commonPart)==0:
                 noCommon=True
-                print('there is no common part in this group')
+                logger.info('there is no common part in this group')
                 break
 
     for k in range(groupLen):
@@ -400,7 +403,7 @@ def posiToSplit(eachGroup,split_threshold):
     for i in range(numOfPosi):
         if numOfDiffParts[i]==1:
             continue
-        # print(numOfDiffParts[i])
+        # logger.info(numOfDiffParts[i])
         if numOfDiffParts[i]<split_threshold:
             if numOfDiffParts[i]<minNum:
                 minNum=numOfDiffParts[i]
@@ -489,7 +492,7 @@ def dfsTraversal(key,logDict,flag,groupLoglist):
 
 #calculate the distance betweent each two logs and save into a matrix       
 def calDistance(wordLL,v,path):
-    print('calculate distance between every two logs...')
+    logger.info('calculate distance between every two logs...')
     logNum=len(wordLL)
     distList=[]
     distMat=np.zeros((logNum,logNum))
@@ -524,9 +527,9 @@ def editDistOfSeq(wordList1,wordList2,v):
                 weight=1.0/(math.exp(i-1-v)+1)
                 minimum = min(d[i-1][j]+weight, d[i][j-1]+weight, d[i-1][j-1]+2*weight)
                 d[i].insert(j, minimum)
-    # print(wordList1)
-    # print(wordList2)
-    # print(d[-1][-1])
+    # logger.info(wordList1)
+    # logger.info(wordList2)
+    # logger.info(d[-1][-1])
     # raw_input()
     return  d[-1][-1]
 

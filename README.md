@@ -3,7 +3,7 @@
 # Changes by Log Analysis Team
 * Sep 25, 2020
   * added `setup.py` to make the package installable
-  * uses `logging` instead of `print()`
+  * uses `logging` instead of `print()` in `loglizer` package
   
 # Logparser  
 [![Documentation Status](https://readthedocs.org/projects/logparser/badge/?version=latest)](https://logparser.readthedocs.io/en/latest/?badge=latest)

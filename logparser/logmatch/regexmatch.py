@@ -38,6 +38,8 @@ import itertools
 import hashlib
 import numpy as np
 
+import logging
+logger = logging.getLogger(__name__)
 
 class PatternMatch(object):
 
@@ -99,18 +101,18 @@ class PatternMatch(object):
 
 
     def match(self, log_filepath, template_filepath):
-        print('Processing log file: {}'.format(log_filepath))
+        logger.info('Processing log file: {}'.format(log_filepath))
         start_time = datetime.now()
         loader = logloader.LogLoader(self.logformat, self.n_workers)
         self.read_template_from_csv(template_filepath)
         log_dataframe = loader.load_to_dataframe(log_filepath)
-        print('Matching event templates...')
+        logger.info('Matching event templates...')
         match_list, paras = self.match_event(log_dataframe['Content'].tolist())
         log_dataframe = pd.concat([log_dataframe, pd.DataFrame(match_list, columns=['EventId', 'EventTemplate'])], axis=1)
         log_dataframe['ParameterList'] = paras
         self._dump_match_result(os.path.basename(log_filepath), log_dataframe)
         match_rate = sum(log_dataframe['EventId'] != 'NONE') / float(len(log_dataframe))
-        print('Matching done, matching rate: {:.1%} [Time taken: {!s}]'.format(match_rate, datetime.now() - start_time))
+        logger.info('Matching done, matching rate: {:.1%} [Time taken: {!s}]'.format(match_rate, datetime.now() - start_time))
         return log_dataframe
 
     def _dump_match_result(self, log_filename, log_dataframe):
@@ -131,7 +133,7 @@ class PatternMatch(object):
         return parameter_list
 
 def match_fn(event_list, template_match_dict, optimized=True):
-    print("Worker {} start matching {} lines.".format(os.getpid(), len(event_list)))
+    logger.info("Worker {} start matching {} lines.".format(os.getpid(), len(event_list)))
     match_list = [regex_match(event_content, template_match_dict, optimized)
                   for event_content in event_list]
     return match_list

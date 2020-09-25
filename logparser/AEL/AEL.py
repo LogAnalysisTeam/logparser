@@ -13,6 +13,9 @@ from datetime import datetime
 from collections import defaultdict
 from functools import reduce
 
+import logging
+logger = logging.getLogger(__name__)
+
 class Event():
     def __init__(self, logidx, Eventstr=""):
         self.id = hashlib.md5(Eventstr.encode('utf-8')).hexdigest()[0:8]
@@ -42,14 +45,14 @@ class LogParser():
 
     def parse(self, logname):
         start_time = datetime.now()
-        print('Parsing file: ' + os.path.join(self.path, logname))
+        logger.info('Parsing file: ' + os.path.join(self.path, logname))
         self.logname = logname
         self.load_data()
         self.tokenize()
         self.categorize()
         self.reconcile()
         self.dump()
-        print('Parsing done. [Time taken: {!s}]'.format(datetime.now() - start_time))
+        logger.info('Parsing done. [Time taken: {!s}]'.format(datetime.now() - start_time))
 
     def tokenize(self):
         '''
@@ -161,9 +164,9 @@ class LogParser():
         return e1
 
     def has_diff(self, tokens1, tokens2):
-        # print(tokens1)
-        # print(tokens2)
-        # print("-----")
+        # logger.info(tokens1)
+        # logger.info(tokens2)
+        # logger.info("-----")
 
         diff = 0
         for idx in range(len(tokens1)):

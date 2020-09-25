@@ -12,6 +12,9 @@ import hashlib
 from collections import defaultdict
 from datetime import datetime
 
+import logging
+logger = logging.getLogger(__name__)
+
 class LogParser(object):
     def __init__(self, indir, outdir, log_format, threshold=0.9, predefined_templates=None, rex=[]):
         self.path = indir
@@ -25,7 +28,7 @@ class LogParser(object):
         self.logname = None
 
     def parse(self, logname):
-        print('Parsing file: ' + os.path.join(self.path, logname))
+        logger.info('Parsing file: ' + os.path.join(self.path, logname))
         self.logname = logname
         starttime = datetime.now()
         headers, regex = self.generate_logformat_regex(self.logformat)
@@ -38,7 +41,7 @@ class LogParser(object):
             words = line.split()
             self.templ_mgr.infer_template(words, idx)
         self.dump_results()
-        print('Parsing done. [Time taken: {!s}]'.format(datetime.now() - starttime))
+        logger.info('Parsing done. [Time taken: {!s}]'.format(datetime.now() - starttime))
 
     def dump_results(self):
         if not os.path.isdir(self.savePath):

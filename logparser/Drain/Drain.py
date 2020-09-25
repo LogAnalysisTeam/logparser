@@ -11,6 +11,8 @@ import pandas as pd
 import hashlib
 from datetime import datetime
 
+import logging
+logger = logging.getLogger(__name__)
 
 class Logcluster:
     def __init__(self, logTemplate='', logIDL=None):
@@ -237,7 +239,7 @@ class LogParser:
         else:
             pStr += node.digitOrtoken
 
-        print(pStr)
+        logger.info(pStr)
 
         if node.depth == self.depth:
             return 1
@@ -246,7 +248,7 @@ class LogParser:
 
 
     def parse(self, logName):
-        print('Parsing file: ' + os.path.join(self.path, logName))
+        logger.info('Parsing file: ' + os.path.join(self.path, logName))
         start_time = datetime.now()
         self.logName = logName
         rootNode = Node()
@@ -276,7 +278,7 @@ class LogParser:
 
             count += 1
             if count % 1000 == 0 or count == len(self.df_log):
-                print('Processed {0:.1f}% of log lines.'.format(count * 100.0 / len(self.df_log)))
+                logger.info('Processed {0:.1f}% of log lines.'.format(count * 100.0 / len(self.df_log)))
 
 
         if not os.path.exists(self.savePath):
@@ -284,7 +286,7 @@ class LogParser:
 
         self.outputResult(logCluL)
 
-        print('Parsing done. [Time taken: {!s}]'.format(datetime.now() - start_time))
+        logger.info('Parsing done. [Time taken: {!s}]'.format(datetime.now() - start_time))
 
     def load_data(self):
         headers, regex = self.generate_logformat_regex(self.log_format)

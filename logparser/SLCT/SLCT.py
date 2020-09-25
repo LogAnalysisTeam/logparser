@@ -14,6 +14,8 @@ from ..logmatch import regexmatch
 import subprocess
 import os
 
+import logging
+logger = logging.getLogger(__name__)
 
 class LogParser(object):
     def __init__(self, indir, outdir, log_format, support, para_j=True, saveLog=False, rex=[]):
@@ -36,16 +38,16 @@ class LogParser(object):
 def SLCT(para, log_format, rex):
     startTime = datetime.now() # start timing
     logname = os.path.join(para['dataPath'], para['dataName'])
-    print("Parsing file: {}".format(logname))
+    logger.info("Parsing file: {}".format(logname))
 
     # SLCT compilation
     if not os.path.isfile('../SLCT/slct'):
         try:
-            print('Compile SLCT...\n>> gcc -o ../logparser/SLCT/slct -O2 ../logparser/SLCT/cslct.c')
+            logger.info('Compile SLCT...\n>> gcc -o ../logparser/SLCT/slct -O2 ../logparser/SLCT/cslct.c')
             subprocess.check_output('gcc -o ../logparser/SLCT/slct -O2 ../logparser/SLCT/cslct.c', 
                 stderr=subprocess.STDOUT, shell=True)
         except:
-            print("Compile error! Please check GCC installed.\n")
+            logger.info("Compile error! Please check GCC installed.\n")
             raise
 
     headers, regex = generate_logformat_regex(log_format)
@@ -62,10 +64,10 @@ def SLCT(para, log_format, rex):
     # Run SLCT command
     SLCT_command = extract_command(para, "slct_input.log")
     try:
-        print ("Run SLCT...\n>> {}".format(SLCT_command))
+        logger.info ("Run SLCT...\n>> {}".format(SLCT_command))
         subprocess.check_call(SLCT_command, shell=True)
     except:
-        print("SLCT executable is invalid! Please compile it using GCC.\n")
+        logger.info("SLCT executable is invalid! Please compile it using GCC.\n")
         raise
 
     # Collect and dump templates
@@ -95,7 +97,7 @@ def SLCT(para, log_format, rex):
 
     df_event.to_csv(os.path.join(para['savePath'], para['dataName'] + "_templates.csv"), index=False, columns=["EventId", "EventTemplate", "Occurrences"])
     matched_df.to_csv(os.path.join(para['savePath'], para['dataName'] + "_structured.csv"), index=False)
-    print('Parsing done. [Time: {!s}]'.format(datetime.now() - startTime))
+    logger.info('Parsing done. [Time: {!s}]'.format(datetime.now() - startTime))
 
 def extract_command(para, logname):
     support = para['support']
@@ -153,7 +155,7 @@ class TempPara:
         self.outlierName = outlierName
 
 def tempProcess(tempPara):
-    print('Dumping event templates...')
+    logger.info('Dumping event templates...')
     if not os.path.exists(tempPara.savePath):
         os.makedirs(tempPara.savePath)
 

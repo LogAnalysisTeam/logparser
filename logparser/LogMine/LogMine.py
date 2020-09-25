@@ -14,6 +14,9 @@ import pandas as pd
 from datetime import datetime
 from collections import defaultdict
 
+import logging
+logger = logging.getLogger(__name__)
+
 class partition():
     def __init__(self, idx, log="", lev=-1):
         self.logs_idx = [idx]
@@ -38,7 +41,7 @@ class LogParser():
 
 
     def parse(self, logname):
-        print('Parsing file: ' + os.path.join(self.path, logname))
+        logger.info('Parsing file: ' + os.path.join(self.path, logname))
         self.logname = logname
         starttime = datetime.now()
         self.load_data()
@@ -57,7 +60,7 @@ class LogParser():
                     cluster.patterns = [self.sequential_merge(cluster.patterns)]
                 self.level_clusters[lev] = clusters
         self.dump()
-        print('Parsing done. [Time taken: {!s}]'.format(datetime.now() - starttime))
+        logger.info('Parsing done. [Time taken: {!s}]'.format(datetime.now() - starttime))
 
     def dump(self):
         if not os.path.isdir(self.savePath):
@@ -126,14 +129,14 @@ class LogParser():
         return " ".join(logn)
 
     def print_cluster(self, cluster):
-        print "------start------"
-        print "level: {}".format(cluster.level)
-        print "idxs: {}".format(cluster.logs_idx)
-        print "patterns: {}".format(cluster.patterns)
-        print "count: {}".format(len(cluster.patterns))
+        logger.info "------start------"
+        logger.info "level: {}".format(cluster.level)
+        logger.info "idxs: {}".format(cluster.logs_idx)
+        logger.info "patterns: {}".format(cluster.patterns)
+        logger.info "count: {}".format(len(cluster.patterns))
         for idx in cluster.logs_idx:
-            print self.df_log.iloc[idx]['Content_']
-        print "------end------"
+            logger.info self.df_log.iloc[idx]['Content_']
+        logger.info "------end------"
 
     def msgDist(self, seqP, seqQ):
         dis = 1

@@ -11,6 +11,8 @@ import hashlib
 from datetime import datetime
 import subprocess
 
+import logging
+logger = logging.getLogger(__name__)
 
 class LogParser():
     def __init__(self, indir, log_format, outdir, rex =[], support=None, rsupport=None, separator=None, lfilter=None, template=None,
@@ -61,7 +63,7 @@ class LogParser():
     def parse(self, filename):
         start_time = datetime.now()
         filepath = os.path.join(self.path, filename)
-        print('Parsing file: ' + filepath)
+        logger.info('Parsing file: ' + filepath)
         self.filename = filename
         headers, regex = self.generate_logformat_regex(self.log_format)
         self.df_log = self.log_to_dataframe(filepath, regex, headers, self.log_format)
@@ -72,15 +74,15 @@ class LogParser():
                         line = re.sub(currentRex, '', line)
                 fw.write(line + '\n')
         try:
-            print ("Run LogCluster command...\n>> {}".format(self.perl_command))
+            logger.info ("Run LogCluster command...\n>> {}".format(self.perl_command))
             subprocess.check_call(self.perl_command, shell=True)
         except:
-            print("LogCluster run failed! Please check perl installed.\n")
+            logger.info("LogCluster run failed! Please check perl installed.\n")
             raise
         self.wirteResultToFile()
         os.remove("logcluster_input.log")
         os.remove("logcluster_output.txt")
-        print('Parsing done. [Time taken: {!s}]'.format(datetime.now() - start_time))
+        logger.info('Parsing done. [Time taken: {!s}]'.format(datetime.now() - start_time))
 
 
     def wirteResultToFile(self):

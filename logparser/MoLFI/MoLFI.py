@@ -17,6 +17,8 @@ from .main.org.core.utility.match_utility import match
 from .main.org.core.metaheuristics.NSGA_II_2D import main
 from datetime import datetime
 
+import logging
+logger = logging.getLogger(__name__)
 
 class LogParser():
     def __init__(self, indir, outdir, log_format, rex=[], n_workers=1):
@@ -56,6 +58,7 @@ class LogParser():
         df_event['EventId'] = df_event['EventTemplate'].map(lambda x: hashlib.md5(x.encode('utf-8')).hexdigest()[0:8])
         df_event.to_csv(os.path.join(self.output_dir, log_file + '_templates.csv'), index=False, columns=["EventId", "EventTemplate", "Occurrences"])
         log_dataframe.to_csv(os.path.join(self.output_dir, log_file + '_structured.csv'), index=False)
-        print('Parsing done. [Time taken: {!s}]'.format(datetime.now() - starttime))
+        logger.info
+        ('Parsing done. [Time taken: {!s}]'.format(datetime.now() - starttime))
         
 

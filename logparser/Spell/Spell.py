@@ -13,6 +13,8 @@ import hashlib
 from datetime import datetime
 import string
 
+import logging
+logger = logging.getLogger(__name__)
 
 class LCSObject:
     """ Class object to store a log group with the same template
@@ -218,7 +220,7 @@ class LogParser:
             pStr += node.token
             if node.logClust is not None:
                 pStr += '-->' + ' '.join(node.logClust.logTemplate)
-        print(pStr + ' ('+ str(node.templateNo) + ')')
+        logger.info(pStr + ' ('+ str(node.templateNo) + ')')
 
         for child in node.childD:
             self.printTree(node.childD[child], dep + 1)
@@ -226,7 +228,7 @@ class LogParser:
 
     def parse(self, logname):
         starttime = datetime.now()  
-        print('Parsing file: ' + os.path.join(self.path, logname))
+        logger.info('Parsing file: ' + os.path.join(self.path, logname))
         self.logname = logname  
         self.load_data()
         rootNode = Node()
@@ -264,13 +266,13 @@ class LogParser:
                 matchCluster.logIDL.append(logID)
             count += 1
             if count % 1000 == 0 or count == len(self.df_log):
-                print('Processed {0:.1f}% of log lines.'.format(count * 100.0 / len(self.df_log)))
+                logger.info('Processed {0:.1f}% of log lines.'.format(count * 100.0 / len(self.df_log)))
             
         if not os.path.exists(self.savePath):
             os.makedirs(self.savePath)
 
         self.outputResult(logCluL)
-        print('Parsing done. [Time taken: {!s}]'.format(datetime.now() - starttime))
+        logger.info('Parsing done. [Time taken: {!s}]'.format(datetime.now() - starttime))
 
     def load_data(self):
         headers, regex = self.generate_logformat_regex(self.logformat)
