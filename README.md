@@ -1,6 +1,10 @@
 <p align="center"> <a href="https://github.com/logpai"> <img src="https://github.com/logpai/logpai.github.io/blob/master/img/logpai_logo.jpg" width="425"></a></p>
 
-
+# Changes by Log Analysis Team
+* Sep 25, 2020
+  * added `setup.py` to make the package installable
+  * uses `logging` instead of `print()`
+  
 # Logparser  
 [![Documentation Status](https://readthedocs.org/projects/logparser/badge/?version=latest)](https://logparser.readthedocs.io/en/latest/?badge=latest)
 [![license](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE.md)
