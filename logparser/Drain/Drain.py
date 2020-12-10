@@ -33,7 +33,7 @@ class Node:
 
 class LogParser:
     def __init__(self, log_format, indir='./', outdir='./result/', depth=4, st=0.4, 
-                 maxChild=100, rex=[], keep_para=True):
+                 maxChild=100, rex=[], keep_para=True, encoding='utf-8'):
         """
         Attributes
         ----------
@@ -55,6 +55,7 @@ class LogParser:
         self.log_format = log_format
         self.rex = rex
         self.keep_para = keep_para
+        self.encoding = encoding
 
     def hasNumbers(self, s):
         return any(char.isdigit() for char in s)
@@ -302,7 +303,7 @@ class LogParser:
         """
         log_messages = []
         linecount = 0
-        with open(log_file, 'r') as fin:
+        with open(log_file, 'r', encoding=self.encoding) as fin:
             for line in fin.readlines():
                 try:
                     match = regex.search(line.strip())
